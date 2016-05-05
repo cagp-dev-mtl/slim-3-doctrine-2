@@ -50,6 +50,11 @@ $container['em'] = function ($c) {
     return \Doctrine\ORM\EntityManager::create($settings['doctrine']['connection'], $config);
 };
 
+// Stormpath
+$container['stormpath'] = function ($c) {
+    return true;
+};
+
 // -----------------------------------------------------------------------------
 // Action factories
 // -----------------------------------------------------------------------------
@@ -61,4 +66,10 @@ $container['App\Action\HomeAction'] = function ($c) {
 $container['App\Action\PhotoAction'] = function ($c) {
     $photoResource = new \App\Resource\PhotoResource($c->get('em'));
     return new App\Action\PhotoAction($photoResource);
+};
+
+$container['App\Action\UserAction'] = function ($c) {
+    $userResource = new \App\Resource\UserResource($c->get('em'));
+
+    return new App\Action\UserAction($userResource, $c->get('logger'));
 };
