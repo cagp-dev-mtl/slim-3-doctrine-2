@@ -50,26 +50,44 @@ $container['em'] = function ($c) {
     return \Doctrine\ORM\EntityManager::create($settings['doctrine']['connection'], $config);
 };
 
-// Stormpath
-$container['stormpath'] = function ($c) {
-    return true;
+// Stormpath Application
+// Reference http://docs.stormpath.com/php/product-guide/w
+$container['stormpathInitialize'] = function ($c) {
+    $settings = $c->get('settings');
+    $apiKeyFile = $settings['stormpath']['api_key_file'];
+    Stormpath\Client::$apiKeyFileLocation = $apiKeyFile;
+};
+
+// Stormpath Application
+// Reference http://docs.stormpath.com/php/product-guide/w
+$container['stormpathApp'] = function ($c) {
+    $settings = $c->get('settings');
+    $c->get('stormpathInitialize');
+    $apiBaseUrl = $settings['stormpath']['api_base_url'];
+    $applicationEndpoint = $settings['stormpath']['application_endpoint'];
+    $application = Stormpath\Resource\Application::get($apiBaseUrl . $applicationEndpoint);
+
+    return $application;
+};
+
+// Stormpath Client
+$container['stormpathClient'] = function ($c) {
+    $c->get('stormpathInitialize');
+
+    return Stormpath\Client::getInstance();
 };
 
 // -----------------------------------------------------------------------------
 // Action factories
 // -----------------------------------------------------------------------------
 
-$container['App\Action\HomeAction'] = function ($c) {
-    return new App\Action\HomeAction($c->get('view'), $c->get('logger'));
-};
-
-$container['App\Action\PhotoAction'] = function ($c) {
-    $photoResource = new \App\Resource\PhotoResource($c->get('em'));
-    return new App\Action\PhotoAction($photoResource);
-};
-
 $container['App\Action\UserAction'] = function ($c) {
     $userResource = new \App\Resource\UserResource($c->get('em'));
 
-    return new App\Action\UserAction($userResource, $c->get('logger'));
+    return new App\Action\UserAction(
+        $userResource,
+        $c->get('logger'),
+        $c->get('stormpathApp'),
+        $c->get('stormpathClient')
+    );
 };

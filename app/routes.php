@@ -1,11 +1,8 @@
 <?php
 // Routes
 
-//$app->get('/api/photos', 'App\Action\PhotoAction:fetch');
-//$app->get('/api/photos/{slug}', 'App\Action\PhotoAction:fetchOne');
+// Create user
+$app->post('/api/v1/users', 'App\Action\UserAction:createAccount');
 
-// Create user in Stormpath
-$app->post('/api/v1.0/users', 'App\Action\UserAction:create');
-
-// Get user information from Stormpath
-$app->get('/api/v1.0/users', 'App\Action\UserAction:get');
+// Authenticate user
+$app->post('/api/v1/authenticate', 'App\Action\UserAction:authenticateAccount');
